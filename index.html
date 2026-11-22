@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOVELORN // ARRIVAL &amp; BOT DIRECTORY</title>
+  <style>
+    :root {
+      --bg: #070707;
+      --card: #0e0e0e;
+      --card-hover: #141414;
+      --border: #262626;
+      --border-light: #444444;
+      --text: #f2f2f2;
+      --muted: #888888;
+      --dim: #555555;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      line-height: 1.5;
+      background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
+      background-size: 24px 24px;
+      overflow-x: hidden;
+    }
+
+    /* =========================================
+       INTRO OVERLAY: PLANE FLIGHT & LANDING
+       ========================================= */
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: linear-gradient(180deg, #040404 0%, #0d0d0d 62%, #151515 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      transition: opacity 0.75s ease, visibility 0.75s ease, transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .intro-overlay.landing-flash {
+      animation: touchdownPulse 0.45s ease;
+    }
+
+    @keyframes touchdownPulse {
+      0% { filter: brightness(1); }
+      45% { filter: brightness(1.35); }
+      100% { filter: brightness(1); }
+    }
+
+    .intro-overlay.hidden-intro {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.03);
+      pointer-events: none;
+    }
+
+    .intro-grain {
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.02) 0px,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .intro-top {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 26px;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: #999;
+      text-transform: uppercase;
+    }
+
+    .skip-btn {
+      background: rgba(10, 10, 10, 0.85);
+      border: 1px solid #444;
+      color: #fff;
+      padding: 7px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: 0.2s;
+    }
+
+    .skip-btn:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    .flight-readout {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+      padding: 0 20px;
+      margin-top: 10px;
+    }
+
+    .flight-tag {
+      display: inline-block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #888;
+      border: 1px solid #2b2b2b;
+      padding: 4px 10px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .flight-headline {
+      font-family: 'Times New Roman', serif;
+      font-size: clamp(24px, 4.5vw, 38px);
+      letter-spacing: 2px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .flight-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #9a9a9a;
+      text-transform: uppercase;
+    }
+
+    .sky-stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      z-index: 4;
+    }
+
+    .cloud-band {
+      position: absolute;
+      left: -20%;
+      width: 140%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+      animation: driftLine 7s linear infinite;
+    }
+
+    .cloud-band.c1 { top: 24%; animation-duration: 8s; }
+    .cloud-band.c2 { top: 43%; animation-duration: 5.5s; opacity: 0.6; }
+    .cloud-band.c3 { top: 61%; animation-duration: 9.5s; opacity: 0.4; }
+
+    @keyframes driftLine {
+      0% { transform: translateX(10%); }
+      100% { transform: translateX(-18%); }
+    }
+
+    .plane-wrap {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 132px;
+      color: #ffffff;
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.28));
+      animation: flyAndLand 3.6s cubic-bezier(0.25, 0.85, 0.35, 1) forwards;
+    }
+
+    .plane-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .contrail {
+      position: absolute;
+      right: 92%;
+      top: 56%;
+      width: 140px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45));
+      transform: translateY(-50%);
+    }
+
+    @keyframes flyAndLand {
+      0% {
+        left: -16%;
+        top: 18%;
+        transform: rotate(8deg) scale(0.85);
+      }
+      45% {
+        left: 38%;
+        top: 32%;
+        transform: rotate(3deg) scale(1);
+      }
+      78% {
+        left: 66%;
+        top: 66%;
+        transform: rotate(-4deg) scale(0.96);
+      }
+      100% {
+        left: 78%;
+        top: 76%;
+        transform: rotate(0deg) scale(0.9);
+      }
+    }
+
+    .horizon-scene {
+      position: relative;
+      z-index: 4;
+      width: 100%;
+      height: 130px;
+      border-top: 1px solid #2a2a2a;
+      background: #060606;
+      overflow: hidden;
+    }
+
+    .neighbourhood-strip {
+      position: absolute;
+      bottom: 34px;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 0 24px;
+      opacity: 0.75;
+    }
+
+    .house {
+      width: 34px;
+      height: 22px;
+      border: 1px solid #454545;
+      border-bottom: none;
+      position: relative;
+      background: #0b0b0b;
+    }
+
+    .house::before {
+      content: "";
+      position: absolute;
+      top: -11px;
+      left: 3px;
+      width: 0;
+      height: 0;
+      border-left: 13px solid transparent;
+      border-right: 13px solid transparent;
+      border-bottom: 11px solid #454545;
+    }
+
+    .house.tall {
+      height: 34px;
+      width: 26px;
+    }
+
+    .house.tall::before {
+      left: 0;
+      border-left-width: 12px;
+      border-right-width: 12px;
+    }
+
+    .house.upside-down {
+      transform: rotate(180deg);
+      border-color: #888;
+    }
+
+    .runway {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 34px;
+      background: #0a0a0a;
+      border-top: 1px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+
+    .runway-dash {
+      width: 28px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.45);
+      animation: runwayScroll 0.8s linear infinite;
+    }
+
+    @keyframes runwayScroll {
+      0% { opacity: 0.25; }
+      50% { opacity: 0.95; }
+      100% { opacity: 0.25; }
+    }
+
+    .intro-bottom {
+      position: relative;
+      z-index: 5;
+      padding: 10px 26px 18px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #666;
+      background: #050505;
+      text-transform: uppercase;
+    }
+
+    /* =========================================
+       MAIN NEIGHBOURHOOD DIRECTORY
+       ========================================= */
+    .ticker {
+      background: #000;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 20px 70px;
+    }
+
+    header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 28px 30px;
+      margin-bottom: 28px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .header-meta {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .house-icon {
+      display: inline-block;
+      transform: rotate(180deg);
+      font-size: 22px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-family: 'Times New Roman', serif;
+      font-size: clamp(28px, 5vw, 42px);
+      letter-spacing: 2px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+      color: #bbb;
+      font-size: 15px;
+      margin-bottom: 18px;
+    }
+
+    .header-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .btn-link {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border-light);
+      background: #121212;
+      padding: 7px 14px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-link:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 14px 18px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      background: #070707;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 9px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: #fff;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: #070707;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: 0.15s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      font-weight: bold;
+    }
+
+    .bot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .bot-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .bot-card:hover {
+      transform: translateY(-3px);
+      border-color: #666;
+      background: var(--card-hover);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+    }
+
+    .pov-badge {
+      border: 1px solid var(--border-light);
+      padding: 2px 6px;
+      font-size: 9px;
+      color: #ddd;
+    }
+
+    .bot-name {
+      font-family: 'Times New Roman', serif;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 0.8px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .bot-tropes {
+      font-size: 10.5px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .bot-desc {
+      font-family: 'Times New Roman', serif;
+      font-size: 14px;
+      color: #cccccc;
+      line-height: 1.55;
+      margin-bottom: 18px;
+      border-top: 1px solid #1d1d1d;
+      padding-top: 10px;
+    }
+
+    .card-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    .chat-btn,
+    .inspect-btn {
+      text-align: center;
+      text-decoration: none;
+      background: #080808;
+      border: 1px solid var(--border-light);
+      color: #fff;
+      padding: 9px 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 10.5px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .chat-btn:hover,
+    .inspect-btn:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      font-weight: bold;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 480px;
+      background: #0c0c0c;
+      border: 1px solid #444;
+      padding: 24px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.95);
+    }
+
+    .modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 10px;
+    }
+
+    .close-modal {
+      background: transparent;
+      border: 1px solid #3a3a3a;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+
+    .close-modal:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    .modal-title {
+      font-family: 'Times New Roman', serif;
+      font-size: 26px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .modal-tropes {
+      font-size: 11px;
+      color: #999;
+      margin-bottom: 14px;
+    }
+
+    .modal-note {
+      font-family: 'Times New Roman', serif;
+      font-size: 15px;
+      color: #ddd;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 40px;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    footer {
+      margin-top: 45px;
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="intro-overlay" id="introOverlay">
+    <div class="intro-grain"></div>
+
+    <div class="intro-top">
+      <span>FLIGHT // NBHD-01</span>
+      <span id="flightPhase">CRUISING ALTITUDE</span>
+      <button type="button" class="skip-btn" id="skipIntroBtn">SKIP ARRIVAL →</button>
+    </div>
+
+    <div class="flight-readout">
+      <div class="flight-tag">WELCOME TO THE NEIGHBOURHOOD</div>
+      <div class="flight-headline" id="flightHeadline">Approaching the Upside-Down House...</div>
+      <div class="flight-sub" id="flightSub">Monochrome skies • Late-night yearning • Prepare for touchdown</div>
+    </div>
+
+    <div class="sky-stage">
+      <div class="cloud-band c1"></div>
+      <div class="cloud-band c2"></div>
+      <div class="cloud-band c3"></div>
+
+      <div class="plane-wrap" id="planeWrap">
+        <div class="contrail"></div>
+        <svg viewBox="0 0 160 64" fill="currentColor" aria-hidden="true">
+          <path d="M148 31c-6-3-18-5-33-6L76 8H62l15 17H42L24 14H14l9 15-9 15h10l18-11h35L62 56h14l39-17c15-1 27-3 33-6 4-1 6-2 6-2s-2-1-6-2z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="horizon-scene">
+      <div class="neighbourhood-strip" aria-hidden="true">
+        <div class="house tall"></div>
+        <div class="house"></div>
+        <div class="house upside-down"></div>
+        <div class="house tall"></div>
+        <div class="house"></div>
+        <div class="house upside-down"></div>
+        <div class="house"></div>
+        <div class="house tall"></div>
+        <div class="house"></div>
+        <div class="house upside-down"></div>
+      </div>
+
+      <div class="runway" aria-hidden="true">
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+        <span class="runway-dash"></span>
+      </div>
+    </div>
+
+    <div class="intro-bottom">
+      <span>LOVELORN AIRWAYS</span>
+      <span>TOUCHDOWN IN PROGRESS</span>
+    </div>
+  </div>
+
+  <div class="ticker">
+    THE NBHD. // BOT ARCHIVE &amp; MASTERLIST • STAY A LITTLE
+  </div>
+
+  <div class="container">
+    <header>
+      <div class="header-meta">
+        <span>LOVELORN // CREATOR INDEX</span>
+        <span>CATALOGUE 001</span>
+      </div>
+      <div class="house-icon">⌂</div>
+      <h1>THE BOT DIRECTORY</h1>
+      <p class="subtitle">"We were too close to the stars..." — All original characters, slow burns &amp; late-night yearning in one place.</p>
+
+      <div class="header-links">
+        <a href="YOUR_JANITOR_AI_PROFILE_LINK" target="_blank" class="btn-link">J.AI PROFILE ↗</a>
+        <a href="YOUR_GOOGLE_FORM_REQUEST_LINK" target="_blank" class="btn-link">BOT REQUESTS ↗</a>
+        <a href="YOUR_INSTAGRAM_LINK" target="_blank" class="btn-link">INSTAGRAM ↗</a>
+        <button type="button" class="btn-link" id="replayFlightBtn">REPLAY FLIGHT ✈</button>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search name, trope, vibe (e.g. rivals, angst)..." />
+      <div class="filter-group">
+        <button type="button" class="filter-btn active" data-filter="ALL">ALL (14)</button>
+        <button type="button" class="filter-btn" data-filter="FEMPOV">FEMPOV</button>
+        <button type="button" class="filter-btn" data-filter="ANYPOV">ANYPOV</button>
+      </div>
+    </div>
+
+    <div class="bot-grid" id="botGrid">
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Sharp banter, lingering glances, and a truce that cracks after midnight.">
+        <div>
+          <div class="card-top"><span>TRACK // 01</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">KILLIAN</div>
+          <div class="bot-tropes">childhood rivals • slow burn • angst</div>
+          <p class="bot-desc">Years of trading sharp remarks and pretending he doesn't care—until one late night breaks the truce.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_1" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Unwavering focus, quiet intensity, and slow-burning devotion.">
+        <div>
+          <div class="card-top"><span>TRACK // 02</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">AZRAEL</div>
+          <div class="bot-tropes">dark romance • devotion • yearning</div>
+          <p class="bot-desc">Quiet, intense, and dangerously patient when it comes to the only person he refuses to let go.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_2" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Composed on the outside, electric friction the moment you're alone.">
+        <div>
+          <div class="card-top"><span>TRACK // 03</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">NICOLÒ BENEDETTI</div>
+          <div class="bot-tropes">enemies to lovers • mutual pining</div>
+          <p class="bot-desc">Cold composure in public, barely restrained tension behind closed doors.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_3" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Measured silences, careful restraint, and unspoken attention.">
+        <div>
+          <div class="card-top"><span>TRACK // 04</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">ALEXEI BELLEMONTE</div>
+          <div class="bot-tropes">emotionally restrained • slow burn</div>
+          <p class="bot-desc">A man of few words who notices every detail about you—and says none of it out loud.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_4" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Familiar warmth turning fragile as feelings shift past friendship.">
+        <div>
+          <div class="card-top"><span>TRACK // 05</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">CAMERON LANGFORD</div>
+          <div class="bot-tropes">friends to lovers • soft angst</div>
+          <p class="bot-desc">Best friends for years, stuck on the blurry line between keeping the peace and crossing it.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_5" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Calculated control that slips whenever you're in harm's way.">
+        <div>
+          <div class="card-top"><span>TRACK // 06</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">RAFFAELE VALENTI</div>
+          <div class="bot-tropes">protective • tension • slow burn</div>
+          <p class="bot-desc">Controlled, calculating, and entirely undone whenever your safety is on the line.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_6" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Competitive pride softened by quiet library hours and stolen glances.">
+        <div>
+          <div class="card-top"><span>TRACK // 07</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">THEODORE HARRINGTON</div>
+          <div class="bot-tropes">academic rivals • yearning</div>
+          <p class="bot-desc">Competing for the top spot by day, sharing quiet late-night study sessions neither of you admit to enjoying.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_7" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Unfinished history pulling both of you back into orbit.">
+        <div>
+          <div class="card-top"><span>TRACK // 08</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">JULIAN ASHCROFT</div>
+          <div class="bot-tropes">brooding • second chance</div>
+          <p class="bot-desc">Crossing paths again after everything left unsaid—and realizing the distance changed nothing.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_8" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Dim lighting, dry wit, and quiet loyalty beneath a sharp edge.">
+        <div>
+          <div class="card-top"><span>TRACK // 09</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">LUCIEN VEYRE</div>
+          <div class="bot-tropes">gothic • morally grey • pining</div>
+          <p class="bot-desc">Shadowed, sharp-tongued, and quietly devoted in ways he'd never confess.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_9" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Honor and restraint tested by an undeniable pull.">
+        <div>
+          <div class="card-top"><span>TRACK // 10</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">AURELIUS SOLARETH</div>
+          <div class="bot-tropes">fantasy • sworn duty • slow burn</div>
+          <p class="bot-desc">Bound by oath and restraint, yet drawn to you against every rule he was raised to keep.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_10" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Blunt exterior, soft spot showing only when you're around.">
+        <div>
+          <div class="card-top"><span>TRACK // 11</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">SILAS VAUGHN</div>
+          <div class="bot-tropes">grumpy x sunshine • angst</div>
+          <p class="bot-desc">Perpetually unimpressed with the world—except when you're the one talking.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_11" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Detached from everyone else, gravitating straight toward you.">
+        <div>
+          <div class="card-top"><span>TRACK // 12</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">CASPIAN RHODES</div>
+          <div class="bot-tropes">distant • unspoken longing</div>
+          <p class="bot-desc">Keeps everyone at arm's length, yet always ends up standing right beside you.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_12" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Quiet evenings, shared music, and feelings waiting to surface.">
+        <div>
+          <div class="card-top"><span>TRACK // 13</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">ASHER CALLOWAY</div>
+          <div class="bot-tropes">boy next door • quiet yearning</div>
+          <p class="bot-desc">Late-night balcony talks, shared headphones, and feelings neither of you dares name first.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_13" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+      <div class="bot-card" data-pov="FEMPOV" data-vibe="Guarded around the crowd, noticeably gentler with you.">
+        <div>
+          <div class="card-top"><span>TRACK // 14</span><span class="pov-badge">FEMPOV</span></div>
+          <div class="bot-name">LENNOX HAWTHORNE</div>
+          <div class="bot-tropes">cold exterior • soft for user</div>
+          <p class="bot-desc">Stoic to everyone else, effortlessly gentle the second you're in the room.</p>
+        </div>
+        <div class="card-actions">
+          <a href="YOUR_BOT_LINK_14" target="_blank" class="chat-btn">CHAT ON J.AI →</a>
+          <button type="button" class="inspect-btn">FILE</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      NO BOTS MATCH YOUR SEARCH // TRY ANOTHER KEYWORD
+    </div>
+
+    <footer>
+      <span>LOVELORN // ALL ORIGINAL CHARACTERS</span>
+      <span>NO MALEPOV • NO NON-CON • DNI IF PROBLEMATIC</span>
+    </footer>
+  </div>
+
+  <div class="modal-backdrop" id="botModal" role="dialog" aria-modal="true" aria-labelledby="modalBotName">
+    <div class="modal-box">
+      <div class="modal-top">
+        <span id="modalTrack">TRACK // 01</span>
+        <button type="button" class="close-modal" id="closeModalBtn">CLOSE [X]</button>
+      </div>
+      <div class="modal-title" id="modalBotName">KILLIAN</div>
+      <div class="modal-tropes" id="modalBotTropes">childhood rivals • slow burn • angst</div>
+      <p class="modal-note" id="modalBotDesc"></p>
+      <a href="#" target="_blank" class="chat-btn" id="modalChatLink">OPEN BOT ON JANITOR AI →</a>
+    </div>
+  </div>
+
+  <script>
+    const introOverlay = document.getElementById('introOverlay');
+    const planeWrap = document.getElementById('planeWrap');
+    const flightPhase = document.getElementById('flightPhase');
+    const flightHeadline = document.getElementById('flightHeadline');
+    const flightSub = document.getElementById('flightSub');
+    const skipIntroBtn = document.getElementById('skipIntroBtn');
+    const replayFlightBtn = document.getElementById('replayFlightBtn');
+
+    let introTimers = [];
+
+    function clearIntroTimers() {
+      introTimers.forEach(id => clearTimeout(id));
+      introTimers = [];
+    }
+
+    function finishIntro() {
+      clearIntroTimers();
+      introOverlay.classList.add('hidden-intro');
+    }
+
+    function startIntro() {
+      clearIntroTimers();
+      introOverlay.classList.remove('hidden-intro', 'landing-flash');
+      flightPhase.textContent = 'CRUISING ALTITUDE';
+      flightHeadline.textContent = 'Approaching the Upside-Down House...';
+      flightSub.textContent = 'Monochrome skies • Late-night yearning • Prepare for touchdown';
+
+      planeWrap.style.animation = 'none';
+      void planeWrap.offsetWidth;
+      planeWrap.style.animation = 'flyAndLand 3.6s cubic-bezier(0.25, 0.85, 0.35, 1) forwards';
+
+      introTimers.push(setTimeout(() => {
+        flightPhase.textContent = 'DESCENDING';
+        flightHeadline.textContent = 'Descending into The Neighbourhood...';
+        flightSub.textContent = 'Runway lights ahead • Check your seatbelts';
+      }, 1500));
+
+      introTimers.push(setTimeout(() => {
+        flightPhase.textContent = 'TOUCHDOWN';
+        flightHeadline.textContent = 'Welcome to the Archive.';
+        flightSub.textContent = '14 tracks loaded • Enjoy your stay';
+        introOverlay.classList.add('landing-flash');
+      }, 3350));
+
+      introTimers.push(setTimeout(() => {
+        finishIntro();
+      }, 4200));
+    }
+
+    skipIntroBtn.addEventListener('click', finishIntro);
+    replayFlightBtn.addEventListener('click', startIntro);
+
+    startIntro();
+
+    const searchInput = document.getElementById('searchInput');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.bot-card');
+    const emptyState = document.getElementById('emptyState');
+
+    let currentFilter = 'ALL';
+
+    function filterBots() {
+      const query = searchInput.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const pov = card.getAttribute('data-pov');
+        const text = card.innerText.toLowerCase();
+        const matchesPov = currentFilter === 'ALL' || pov === currentFilter;
+        const matchesSearch = text.includes(query);
+
+        if (matchesPov && matchesSearch) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    searchInput.addEventListener('input', filterBots);
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-filter');
+        filterBots();
+      });
+    });
+
+    const botModal = document.getElementById('botModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalTrack = document.getElementById('modalTrack');
+    const modalBotName = document.getElementById('modalBotName');
+    const modalBotTropes = document.getElementById('modalBotTropes');
+    const modalBotDesc = document.getElementById('modalBotDesc');
+    const modalChatLink = document.getElementById('modalChatLink');
+
+    document.querySelectorAll('.inspect-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('.bot-card');
+        const track = card.querySelector('.card-top span').textContent;
+        const pov = card.getAttribute('data-pov');
+        const name = card.querySelector('.bot-name').textContent;
+        const tropes = card.querySelector('.bot-tropes').textContent;
+        const desc = card.querySelector('.bot-desc').textContent;
+        const vibe = card.getAttribute('data-vibe') || '';
+        const link = card.querySelector('.chat-btn').getAttribute('href');
+
+        modalTrack.textContent = `${track} // ${pov}`;
+        modalBotName.textContent = name;
+        modalBotTropes.textContent = tropes;
+        modalBotDesc.textContent = `${desc} ${vibe}`.trim();
+        modalChatLink.setAttribute('href', link);
+
+        botModal.classList.add('open');
+      });
+    });
+
+    closeModalBtn.addEventListener('click', () => botModal.classList.remove('open'));
+    botModal.addEventListener('click', (e) => {
+      if (e.target === botModal) botModal.classList.remove('open');
+    });
+  </script>
+</body>
+</html>
