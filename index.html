@@ -511,10 +511,124 @@
       color: var(--dim);
       text-transform: uppercase;
     }
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(180deg, #050505 0%, #101010 70%, #161616 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: opacity 0.65s ease, visibility 0.65s ease;
+}
+
+.intro-screen.gone {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #999;
+  text-transform: uppercase;
+}
+
+.intro-mid {
+  text-align: center;
+  padding: 0 20px;
+}
+
+.intro-mid h2 {
+  font-family: 'Times New Roman', serif;
+  font-size: clamp(24px, 4.5vw, 38px);
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.intro-mid p {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.intro-sky {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+.intro-plane {
+  position: absolute;
+  top: 15%;
+  left: 0;
+  width: 120px;
+  color: #fff;
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.25));
+  animation: introFly 3.4s ease-in-out forwards;
+}
+
+@keyframes introFly {
+  0% {
+    transform: translateX(-140px) translateY(0px) rotate(12deg);
+  }
+  65% {
+    transform: translateX(48vw) translateY(28vh) rotate(6deg);
+  }
+  100% {
+    transform: translateX(75vw) translateY(48vh) rotate(0deg);
+  }
+}
+
+.intro-ground {
+  height: 92px;
+  border-top: 1px solid #262626;
+  background: #070707;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 14px;
+  color: #9a9a9a;
+}
   </style>
 </head>
 <body>
+<div class="intro-screen" id="introScreen">
+  <div class="intro-bar">
+    <span>FLIGHT // NBHD-01</span>
+    <span id="introPhase">IN FLIGHT</span>
+    <button type="button" class="btn-link" id="skipIntro">SKIP →</button>
+  </div>
 
+  <div class="intro-mid">
+    <h2 id="introTitle">Flying into The Neighbourhood...</h2>
+    <p id="introSub">Preparing for touchdown</p>
+  </div>
+
+  <div class="intro-sky">
+    <div class="intro-plane" id="introPlane">
+      <svg viewBox="0 0 160 64" fill="currentColor" aria-hidden="true">
+        <path d="M148 31c-6-3-18-5-33-6L76 8H62l15 17H42L24 14H14l9 15-9 15h10l18-11h35L62 56h14l39-17c15-1 27-3 33-6 4-1 6-2 6-2s-2-1-6-2z"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="intro-ground" aria-hidden="true">
+    <span>⌂</span>
+    <span class="flip-house">⌂</span>
+    <span>⌂</span>
+    <span class="flip-house">⌂</span>
+    <span>⌂</span>
+    <span class="flip-house">⌂</span>
+  </div>
+</div>
   <div class="topbar">
     <span>THE NBHD // CONCERT &amp; LP ARCHIVE</span>
     <span>BUILD // V4-CONCERT</span>
@@ -935,6 +1049,45 @@
     passModal.addEventListener('click', (e) => {
       if (e.target === passModal) passModal.classList.remove('open');
     });
-  </script>
+
+const introScreen = document.getElementById('introScreen');
+const introPlane = document.getElementById('introPlane');
+const introPhase = document.getElementById('introPhase');
+const introTitle = document.getElementById('introTitle');
+const introSub = document.getElementById('introSub');
+const skipIntro = document.getElementById('skipIntro');
+
+let introTimer1, introTimer2;
+
+function closeIntro() {
+  clearTimeout(introTimer1);
+  clearTimeout(introTimer2);
+  introScreen.classList.add('gone');
+}
+
+function openIntro() {
+  clearTimeout(introTimer1);
+  clearTimeout(introTimer2);
+  introScreen.classList.remove('gone');
+  introPhase.textContent = 'IN FLIGHT';
+  introTitle.textContent = 'Flying into The Neighbourhood...';
+  introSub.textContent = 'Preparing for touchdown';
+
+  introPlane.style.animation = 'none';
+  void introPlane.offsetWidth;
+  introPlane.style.animation = 'introFly 3.4s ease-in-out forwards';
+
+  introTimer1 = setTimeout(() => {
+    introPhase.textContent = 'LANDING';
+    introTitle.textContent = 'Touching down on the block...';
+    introSub.textContent = 'Welcome in';
+  }, 2100);
+
+  introTimer2 = setTimeout(closeIntro, 3800);
+}
+
+skipIntro.addEventListener('click', closeIntro);
+replayFlight.addEventListener('click', openIntro);
+openIntro();</script>
 </body>
 </html>
